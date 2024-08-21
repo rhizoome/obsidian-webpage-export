@@ -623,6 +623,8 @@ export namespace _MarkdownRendererInternal
 	{
 		if (checkCancelled()) return undefined;
 
+
+
 		// this is to decide whether to inline the HTML of certain node or not
 		let allExportedPaths = Settings.getAllFilesFromPaths(options.filesToExport);
 
@@ -968,15 +970,15 @@ export namespace _MarkdownRendererInternal
 		{
 			// hide the leaf so we can render without intruding on the user
 			// @ts-ignore
-			// renderLeaf.parent.containerEl.style.height = "0";
+			renderLeaf.parent.containerEl.style.height = "0";
 			// @ts-ignore
-			// renderLeaf.parent.parent.containerEl.querySelector(".clickable-icon, .workspace-tab-header-container-inner").style.display = "none";
+			renderLeaf.parent.parent.containerEl.querySelector(".clickable-icon, .workspace-tab-header-container-inner").style.display = "none";
 			// @ts-ignore
-			// renderLeaf.parent.containerEl.style.maxHeight = "var(--header-height)";
+			renderLeaf.parent.containerEl.style.maxHeight = "var(--header-height)";
 			// @ts-ignore
-			// renderLeaf.parent.parent.containerEl.classList.remove("mod-vertical");
+			renderLeaf.parent.parent.containerEl.classList.remove("mod-vertical");
 			// @ts-ignore
-			// renderLeaf.parent.parent.containerEl.classList.add("mod-horizontal");
+			renderLeaf.parent.parent.containerEl.classList.add("mod-horizontal");
 
 			const newSize = { width: 900, height: 400 };
 			obsidianWindow.resizeTo(newSize.width, newSize.height);

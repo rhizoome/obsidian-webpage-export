@@ -4,6 +4,7 @@ import { GraphRenderWorker } from "../graph-view/graph-worker-helper";
 import { LinkHandler } from "./links";
 import { GraphViewOptions } from "shared/features/graph-view";
 import { InsertedFeature } from "shared/feature";
+import { ObsidianFileType } from "shared/website-data";
 
 export class GraphView extends InsertedFeature
 {
@@ -352,7 +353,7 @@ export class GraphView extends InsertedFeature
 			}
 			else
 			{
-				localThis.showGraph([ObsidianSite.document.pathname]);
+				localThis.showGraph([ObsidianSite.document?.pathname ?? ""]);
 			}
 		});
 	
@@ -410,7 +411,7 @@ export class GraphView extends InsertedFeature
 		let pathIndex = 0;
 		for (const source of this.paths)
 		{
-			const fileInfo = ObsidianSite.getWebpageData(source);
+			const fileInfo = await ObsidianSite.getWebpageData(source);
 			if (!fileInfo) continue;
 
 			this.labels.push(fileInfo.title);
@@ -447,7 +448,7 @@ export class GraphView extends InsertedFeature
 		{
 			for (const element of paths)
 			{
-				const fileInfo = ObsidianSite.getWebpageData(element);
+				const fileInfo = await ObsidianSite.getWebpageData(element);
 				if (fileInfo?.backlinks)
 					linked.push(...fileInfo.backlinks);
 				if (fileInfo?.links)
@@ -468,9 +469,10 @@ export class GraphView extends InsertedFeature
 		else
 			this.isGlobalGraph = false;
 
-		linked = linked.filter((l) => 
+		linked = linked.filter(async (l) => 
 		{
-			let data = ObsidianSite.getWebpageData(l);
+			let data = await ObsidianSite.getWebpageData(l);
+			console.log("Data for", l, data);
 			if (!data) return false;
 			
 			if (data.backlinks.length == 0)
@@ -481,7 +483,7 @@ export class GraphView extends InsertedFeature
 			if (!this.options.showOrphanNodes && data.backlinks.length == 0 && data.links.length == 0)
 				return false;
 
-			if (!this.options.showAttachments && (data.type == "attachment" || data.type == "media" || data.type == "other"))
+			if (!this.options.showAttachments && (data.type == ObsidianFileType.Attachment || data.type == ObsidianFileType.Other))
 				return false;
 
 			return true;
@@ -532,7 +534,7 @@ export class GraphView extends InsertedFeature
 		this.globalGraphButton.innerHTML = this.isGlobalGraph ? localSVG : globalSVG;
 	
 		// set current file as active node
-		this.setActiveNodeByPath(ObsidianSite.document.pathname);
+		this.setActiveNodeByPath(ObsidianSite.document?.pathname ?? "");
 	}
 
 	public fitToNodes()
@@ -569,7 +571,12 @@ export class GraphView extends InsertedFeature
 	private drawLastTime = 0;
 	private async draw(time: number)
 	{
-		if (!this.graphRenderer || !this.graphSim || this.paths.length == 0) return;
+		if (!this.graphRenderer || !this.graphSim || this.paths.length == 0)
+		{
+			await new Promise(resolve => setTimeout(resolve, 100));
+			requestAnimationFrame(this.draw.bind(this));
+			return;
+		}
 
 		const dt = (time - this.drawLastTime) / 1000;
 		this.drawLastTime = time;

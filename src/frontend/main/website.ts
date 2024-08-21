@@ -21,6 +21,7 @@ export class ObsidianWebsite
 	public isLoaded: boolean = false;
 	public isHttp: boolean = window.location.protocol != "file:";
 	public metadata: WebsiteData;
+	private cachedMetadata: { [url: string]: WebpageData } = {};
 	public theme: Theme;
 	public fileTree: Tree | undefined = undefined;
 	public outlineTree: Tree | undefined = undefined;
@@ -48,7 +49,7 @@ export class ObsidianWebsite
 			console.error("Failed to load website data.");
 			return;
 		}
-	}
+	} 
 
 	private async onInit()
 	{
@@ -82,9 +83,7 @@ export class ObsidianWebsite
 		const pathname = document.querySelector("meta[name='pathname']")?.getAttribute("content") ?? "unknown";
 		this.entryPage = pathname;
 
-		this.document = await new WebpageDocument(pathname).init();
-		await this.document.loadChildDocuments();
-		await this.document.postLoadInit();
+		this.document = await this.loadURL(pathname) ?? new WebpageDocument(pathname);
 		
 		if (ObsidianSite.metadata.featureOptions.graphView.enabled)
 		{
@@ -94,7 +93,6 @@ export class ObsidianWebsite
 		this.initEvents();
 		
 		this.isLoaded = true;
-		this.onloadCallbacks.forEach(cb => cb(this.document));
 	}
 
 	private initEvents()
@@ -121,14 +119,14 @@ export class ObsidianWebsite
 		url = LinkHandler.getPathnameFromURL(url);
 		console.log("Loading URL", url);
 
-		if (this.document.pathname == url)
+		if (this.document?.pathname == url)
 		{
 			if (header) this.document.scrollToHeader(header);
 			console.log("loading header", header);
 			return this.document;
 		}
 
-		let data = ObsidianSite.getWebpageData(url) as WebpageData;
+		let data = await ObsidianSite.getWebpageData(url);
 		if (!data)
 		{
 			new Notice("This page does not exist yet.");
@@ -137,7 +135,7 @@ export class ObsidianWebsite
 		}
 
 		let page = await (await new WebpageDocument(url).load()).init();
-		this.onloadCallbacks.forEach(cb => cb(this.document));
+		this.onloadCallbacks.forEach(cb => cb(this.document as WebpageDocument));
 		return page;
 	}
 
@@ -160,15 +158,15 @@ export class ObsidianWebsite
 		}
 		else
 		{
-			let file = this.metadata.fileInfo[url];
-			if (!file?.data)
-			{
-				console.error("Failed to fetch", url);
-				return;
-			}
+			// let file = this.metadata.fileInfo[url];
+			// if (!file?.data)
+			// {
+			// 	console.error("Failed to fetch", url);
+			// 	return;
+			// }
 
-			let req = new Response(file.data, {status: 200});
-			return req;
+			// let req = new Response(file.data, {status: 200});
+			// return req;
 		}
 	}
 
@@ -176,9 +174,10 @@ export class ObsidianWebsite
 	{
 		if (this.isHttp)
 		{
+			console.log("Loading remote metadata");
 			try
 			{
-				const dataReq = await fetch(Shared.libFolderName + "/metadata.json");
+				const dataReq = await fetch(Shared.libFolderName + "/" + Shared.metadataFileName);
 				if (dataReq.ok)
 				{
 					return await dataReq.json();
@@ -195,9 +194,14 @@ export class ObsidianWebsite
 		}
 		else
 		{
+			console.log("Loading local metadata");
 			// when local the metadata is embedded
 			const dataEl = document.querySelector("data#website-metadata");
-			if (!dataEl) return undefined;
+			if (!dataEl)
+			{
+				console.error("Could not find metadata element");
+				return;
+			}
 			return JSON.parse(decodeURI(dataEl.getAttribute("value") ?? ""))
 		}
 
@@ -246,17 +250,33 @@ export class ObsidianWebsite
 		await waitUntil(() => this.graphView != undefined);
 	}
 
-	public getWebpageData(url: string)
+	public async getWebpageData(url: string)
 	{
-		if (this.metadata)
-		{
-			const data = this.metadata.webpages[url];
-			if (data)
-			{
-				return data;
-			}
-		}
+		if (this.cachedMetadata[url]) return this.cachedMetadata[url];
 
+		// replace extension with .json
+		url = url.replace(/\.html$/, ".json");
+		let data: WebpageData | undefined = undefined
+		try
+		{
+			let resp = await this.fetch(url);
+			if (!resp) return;
+			if (!resp.ok) return;
+			data = await resp.json() as WebpageData;
+		}
+		catch (e)
+		{
+			console.error("Failed to load webpage data", url, e);
+			return;
+		}
+		
+		this.cachedMetadata[url] = data;
+		return data;
+	}
+
+	public getWebpageDataCached(url: string)
+	{
+		if (this.cachedMetadata[url]) return this.cachedMetadata[url];
 		return undefined;
 	}
 

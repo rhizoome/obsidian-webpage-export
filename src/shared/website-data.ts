@@ -20,7 +20,7 @@ export enum EmojiStyle
 	FluentUI = "FluentUI",
 }
 
-export enum DocumentType
+export enum ObsidianFileType
 {
 	Markdown = "markdown",
 	Canvas = "canvas",
@@ -30,39 +30,54 @@ export enum DocumentType
 	Other = "other"
 }
 
-export interface FileData
+export class Stat
 {
-	createdTime: number;
-	modifiedTime: number;
-	sourceSize: number;
-	sourcePath: string;
-	exportPath: string;
-	showInTree: boolean;
-	treeOrder: number;
-	backlinks: string[];
-	type: string;
-	data: string | null;
+	createdTime: number = 0;
+	modifiedTime: number = 0;
+	sourceSize: number = 0;
 }
 
-export interface WebpageData extends FileData
+export class FileData
 {
-	headers: {heading: string, level: number, id: string}[];
-	aliases: string[];
-	inlineTags: string[];
-	frontmatterTags: string[];
-	links: string[];
-	attachments: string[];
-
-	title: string;
-	pathToRoot: string;
-	icon: string;
-	description: string;
-	author: string;
-	coverImageURL: string;
-	fullURL: string;
+	stat: Stat = new Stat();
+	path: string = "";
+	sourcePath: string = "";
+	showInTree: boolean = false;
+	treeOrder: number = 0;
+	backlinks: string[] = [];
+	type: ObsidianFileType = ObsidianFileType.Other;
+	data: string | null = null;
 }
 
-export class WebsiteOptions
+export interface HeadingData
+{
+	heading: string;
+	level: number;
+	id: string;
+}
+
+export class WebpageData extends FileData
+{
+	headers: HeadingData[] = [];
+	aliases: string[] = [];
+	inlineTags: string[] = [];
+	frontmatterTags: string[] = [];
+	links: string[] = [];
+	attachments: string[] = [];
+
+	contentPath: string = "";
+	title: string = "";
+	pathToRoot: string = "";
+	icon: string = "";
+	description: string = "";
+	author: string = "";
+	coverImageURL: string = "";
+	url: string = "";
+
+	outlineHTML: string = "";
+}
+
+export class WebsiteFeatureOptions
 {
 	/**
 	 * The options for the backlinks feature.
@@ -127,23 +142,22 @@ export class WebsiteOptions
 
 export class WebsiteData
 {
-	webpages: {[targetPath: string]: WebpageData};
-	fileInfo: {[targetPath: string]: FileData};
-	sourceToTarget: {[sourcePath: string]: string};
-	attachments: string[];
-	shownInTree: string[];
-	allFiles: string[];
+	allFiles: string[] = [];
+	sourceToTarget: {[sourcePath: string]: string} = {};
+	targetToSource: {[targetPath: string]: string} = {};
+	allBacklinks: {[targetPath: string]: string[]} = {};
+	allLinks: {[targetPath: string]: string[]} = {};
 
-	siteName: string;
-	vaultName: string;
-	createdTime: number;
-	modifiedTime: number;
-	pluginVersion: string;
-	exportRoot: string;
-	baseURL: string;
+	siteName: string = "";
+	vaultName: string = "";
+	createdTime: number = 0;
+	modifiedTime: number = 0;
+	pluginVersion: string = "";
+	exportRoot: string = "";
+	baseURL: string = "";
 
-	themeName: string;
-	bodyClasses: string;
-	hasFavicon: boolean;
-	featureOptions: WebsiteOptions;
+	themeName: string = "";
+	bodyClasses: string = "";
+	hasFavicon: boolean = false;
+	featureOptions: WebsiteFeatureOptions = new WebsiteFeatureOptions();
 }

@@ -39,7 +39,6 @@ a.tree-item-self.is-clickable
 
 .tree-container .feature-title
 {
-	margin-left: 4px;
     flex-grow: 0 !important;
     margin-right: .5em !important;
     font-size: inherit !important;

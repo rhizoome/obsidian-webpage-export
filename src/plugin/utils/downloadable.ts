@@ -1,6 +1,7 @@
 import { ExportPipelineOptions } from "plugin/website/pipeline-options.js";
 import { Path } from "./path";
 import { FileStats, TFile } from "obsidian";
+import { FileData } from "shared/website-data";
 
 export class Attachment
 {
@@ -49,6 +50,8 @@ export class Attachment
 		this._data = data;
 		if (!this.source) this.sourceStat = { ctime: Date.now(), mtime: Date.now(), size: this.data?.length ?? 0 };
 	}
+
+	public fileInfo: FileData;
 
 
 	constructor(data: string | Buffer, target: Path, source: TFile | undefined | null, options: ExportPipelineOptions)

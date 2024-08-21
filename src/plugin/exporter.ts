@@ -60,30 +60,30 @@ export class HTMLExporter
 				return;
 			}
 
-			if (deleteOld)
-			{
-				let i = 0;
-				for (const dFile of website.index.deletedFiles)
-				{
-					const path = new Path(dFile, destination.path);
-					await path.delete();
-					ExportLog.progress(i / website.index.deletedFiles.length, "Deleting Old Files", "Deleting: " + path.path, "var(--color-red)");
-					i++;
-				};
+			// if (deleteOld)
+			// {
+			// 	let i = 0;
+			// 	for (const dFile of website.index.deletedFiles)
+			// 	{
+			// 		const path = new Path(dFile, destination.path);
+			// 		await path.delete();
+			// 		ExportLog.progress(i / website.index.deletedFiles.length, "Deleting Old Files", "Deleting: " + path.path, "var(--color-red)");
+			// 		i++;
+			// 	};
 
-				await Path.removeEmptyDirectories(destination.path);
-			}
+			// 	await Path.removeEmptyDirectories(destination.path);
+			// }
 			
 			if (saveFiles) 
 			{
 				if (Settings.exportOptions.combineAsSingleFile)
 				{
-					await website.saveAsCombinedHTML();
+					// await website.saveAsCombinedHTML();
 				}
 				else
 				{
-					await Utils.downloadAttachments(website.index.newFiles);
-					await Utils.downloadAttachments(website.index.updatedFiles);
+					// await Utils.downloadAttachments(website.index.newFiles);
+					// await Utils.downloadAttachments(website.index.updatedFiles);
 				}
 			}
 		}

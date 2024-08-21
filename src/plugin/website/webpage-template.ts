@@ -1,4 +1,4 @@
-import { InsertedFeatureOptions } from "shared/features/feature-options-base";
+import { InsertedFeatureOptions, TemplateInsert } from "shared/features/feature-options-base";
 import { ExportLog } from "plugin/render-api/render-api";
 import { ExportPipelineOptions } from "./pipeline-options";
 
@@ -10,7 +10,7 @@ export class WebpageTemplate
 {
 	private options: ExportPipelineOptions;
 	private layout: HTMLElement;
-	public deferredFeatures: {feature: HTMLElement, featureOptions: InsertedFeatureOptions}[] = [];
+	public deferredFeatures: TemplateInsert[] = [];
 
 	constructor (options: ExportPipelineOptions)
 	{
@@ -50,8 +50,9 @@ export class WebpageTemplate
 		this.layout = layout;
 	}
 
-	public insertFeature(feature: HTMLElement, featureOptions: InsertedFeatureOptions): void
+	public insertFeature(insert: TemplateInsert): void
 	{
+		const {feature, featureOptions} = insert;
 		const insertedSuccesfully = featureOptions.insertFeature(this.layout, feature);
 
 		if (insertedSuccesfully)
@@ -61,7 +62,7 @@ export class WebpageTemplate
 			this.deferredFeatures = [];
 			for (let deferredFeature of deferredFeatures)
 			{
-				this.insertFeature(deferredFeature.feature, deferredFeature.featureOptions);
+				this.insertFeature(deferredFeature);
 			}
 
 			ExportLog.log(`Inserted feature ${featureOptions.featureId} with placement: ${featureOptions.featurePlacement}`);

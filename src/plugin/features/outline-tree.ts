@@ -1,6 +1,7 @@
 import {  TFile } from "obsidian";
 import { Tree, TreeItem } from "./tree";
 import { Webpage } from "plugin/website/webpage";
+import { HeadingData } from "shared/website-data";
 
 export class OutlineTree extends Tree
 {
@@ -10,7 +11,7 @@ export class OutlineTree extends Tree
 	public minDepth: number = 1;
 	public depth: number = 0;
 
-	private createTreeItem(heading: {heading: string, level: number, headingEl: HTMLElement}, parent: OutlineTreeItem | OutlineTree): OutlineTreeItem
+	private createTreeItem(heading: HeadingData, parent: OutlineTreeItem | OutlineTree): OutlineTreeItem
 	{
 		const item = new OutlineTreeItem(this, parent, heading);
 		item.title = heading.heading;
@@ -25,9 +26,9 @@ export class OutlineTree extends Tree
 		this.file = webpage.source;
 		this.minDepth = minDepth;
 
-		if (webpage.type != "markdown") return;
+		if (webpage.metadata.type != "markdown") return;
 
-		const headings = webpage.headings;
+		const headings = webpage.metadata.headers;
 		this.depth = Math.min(...headings.map(h => h.level)) - 1;
 
 		let parent: OutlineTreeItem | OutlineTree = this;
@@ -77,14 +78,14 @@ export class OutlineTreeItem extends TreeItem
 	public parent: OutlineTreeItem | OutlineTree;
 	public heading: string;
 
-	public constructor(tree: OutlineTree, parent: OutlineTreeItem | OutlineTree, heading: {heading: string, level: number, headingEl: HTMLElement})
+	public constructor(tree: OutlineTree, parent: OutlineTreeItem | OutlineTree, heading: HeadingData)
 	{
 		super(tree, parent, heading.level);
 		this.heading = heading.heading;
-		this.href = "#" + heading.headingEl.id;
-		if (!tree.webpage.exportOptions.relativeHeaderLinks)
+		this.href = "#" + heading.id;
+		if (!tree.webpage.options.relativeHeaderLinks)
 		{
-			this.href = tree.webpage.targetPath + this.href;
+			this.href = tree.webpage.templatePath + this.href;
 		}
 	}
 

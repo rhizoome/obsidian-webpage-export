@@ -34,6 +34,17 @@ if (window && window.location)
 	window.LinkHandler = LinkHandler;
 	window.Search = Search;
 
-	ObsidianSite.init();
+	if (window.location.protocol == "file:")
+	{
+		// init the website when dom is ready
+		window.addEventListener("DOMContentLoaded", () => 
+		{
+			ObsidianSite.init();
+		});
+	}
+	else
+	{
+		ObsidianSite.init();
+	}
 }
 

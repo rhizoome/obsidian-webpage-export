@@ -85,6 +85,18 @@ export class FeatureOptions
 	enabled: boolean = true;
 }
 
+export class TemplateInsert
+{
+	feature: HTMLElement
+	featureOptions: InsertedFeatureOptions
+
+	constructor(feature: HTMLElement, featureOptions: InsertedFeatureOptions)
+	{
+		this.feature = feature;
+		this.featureOptions = featureOptions;
+	}
+}
+
 export class InsertedFeatureOptions extends FeatureOptions
 {
 	displayTitle: string = "Feature";

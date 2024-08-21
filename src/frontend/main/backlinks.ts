@@ -16,13 +16,13 @@ export class Backlink
 		return this._url;
 	}
 
-	constructor(container: HTMLElement, targetURL: string)
+	public async init(container: HTMLElement, targetURL: string)
 	{
-		this.targetData = ObsidianSite.getWebpageData(targetURL) as WebpageData;
+		this.targetData = await ObsidianSite.getWebpageData(targetURL) as WebpageData;
 		if (!this.targetData)
 		{
 			console.error("Failed to find target for backlink", targetURL);
-			return;
+			return this;
 		}
 
 		this._url = targetURL;
@@ -46,6 +46,8 @@ export class Backlink
 			e.preventDefault();
 			ObsidianSite.loadURL(this.url);
 		});
+
+		return this;
 	}
 }
 
@@ -57,6 +59,8 @@ export class BacklinkList extends InsertedFeature
 	{
 		super(ObsidianSite.metadata.featureOptions.backlinks);
 
-		this.backlinks = backlinkPaths.map(url => new Backlink(this.contentEl, url));
+		Promise.all(backlinkPaths.map(async (url) => await new Backlink().init(this.contentEl, url))).then(backlinks => {
+			this.backlinks = backlinks;
+		});
 	}
 }

@@ -245,11 +245,19 @@ export class TreeItem
 		});
 	}
 
-	public unsort()
+	public async unsort()
 	{
 		this.itemEl.classList.remove("sorted");
 
-		this.sort((a, b) => (ObsidianSite.getWebpageData(a.path)?.treeOrder ?? 0) - (ObsidianSite.getWebpageData(b.path)?.treeOrder ?? 0));
+		this.sort((a, b) => 
+		{
+			// ((await ObsidianSite.getWebpageData(a.path))?.treeOrder ?? 0) - ((await ObsidianSite.getWebpageData(b.path))?.treeOrder ?? 0)
+			const aData = ObsidianSite.getWebpageDataCached(a.path)
+			const bData = ObsidianSite.getWebpageDataCached(b.path)
+			const aOrder = aData ? aData.treeOrder : 0;
+			const bOrder = bData ? bData.treeOrder : 0;
+			return aOrder - bOrder;
+		});
 	}
 
 	/**

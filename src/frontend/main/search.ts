@@ -149,7 +149,7 @@ export class Search
 		this.container = this.input?.closest("#search-container") as HTMLElement;
 		if (!this.input || !this.container) return;
 
-		const indexResp = await ObsidianSite.fetch(Shared.libFolderName + '/search-index.json');
+		const indexResp = await ObsidianSite.fetch(Shared.libFolderName + '/' + Shared.searchIndexFileName);
 		if (!indexResp?.ok)
 		{
 			console.error("Failed to fetch search index");
@@ -197,7 +197,7 @@ export class Search
 	private async searchCurrentDocument(query: string)
 	{
 		this.clearCurrentDocumentSearch();
-		const textNodes = getTextNodes(ObsidianSite.document.sizerEl);
+		const textNodes = getTextNodes(ObsidianSite.document?.sizerEl);
 
 		textNodes.forEach(async (node) =>
 		{

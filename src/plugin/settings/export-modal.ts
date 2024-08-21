@@ -7,7 +7,7 @@ import { Path } from 'plugin/utils/path';
 import { FileDialogs } from 'plugin/utils/file-dialogs';
 import { createFileInput, createToggle } from './settings-components';
 import { Website } from 'plugin/website/website';
-import { Index } from 'plugin/website';
+// import { Index } from 'plugin/website';
 
 export interface ExportInfo
 {
@@ -181,63 +181,63 @@ export class ExportModal extends Modal
 		
 
 		// add purge export button
-		new Setting(contentEl)
+		// new Setting(contentEl)
 			
-			.addButton((button) => button
-			.setButtonText('Clear Cache')
-			.onClick(async () =>
-			{
-				// create a modal to confirm the deletion
-				const confirmModal = new Modal(app);
-				confirmModal.titleEl.setText("Are you sure?");
-				confirmModal.contentEl.createEl('p', { text: "This will delete the site metadata (but not all the exported html)." });
-				confirmModal.contentEl.createEl('p', { text: "This will force the site to re-export all files." });
-				confirmModal.contentEl.createEl('p', { text: "Also if you change which files are selected for export before exporting again some files may be left on your file system unused." });
-				confirmModal.contentEl.createEl('p', { text: "This action cannot be undone." });
-				confirmModal.open();
+		// 	.addButton((button) => button
+		// 	.setButtonText('Clear Cache')
+		// 	.onClick(async () =>
+		// 	{
+		// 		// create a modal to confirm the deletion
+		// 		const confirmModal = new Modal(app);
+		// 		confirmModal.titleEl.setText("Are you sure?");
+		// 		confirmModal.contentEl.createEl('p', { text: "This will delete the site metadata (but not all the exported html)." });
+		// 		confirmModal.contentEl.createEl('p', { text: "This will force the site to re-export all files." });
+		// 		confirmModal.contentEl.createEl('p', { text: "Also if you change which files are selected for export before exporting again some files may be left on your file system unused." });
+		// 		confirmModal.contentEl.createEl('p', { text: "This action cannot be undone." });
+		// 		confirmModal.open();
 
-				new Setting(confirmModal.contentEl)
-				.addButton((button) => button
-				.setButtonText('Cancel')
-				.onClick(() => confirmModal.close()))
-				.addButton((button) => button
-				.setButtonText('Clear Cache')
-				.onClick(async () =>
-				{
-					const path = new Path(exportPathInput.textInput.getValue());
-					const website = await new Website(path).load();
-					await website.index.clearCache();
-					onChanged(path);
-					confirmModal.close();
-				}));
-			}))
+		// 		new Setting(confirmModal.contentEl)
+		// 		.addButton((button) => button
+		// 		.setButtonText('Cancel')
+		// 		.onClick(() => confirmModal.close()))
+		// 		.addButton((button) => button
+		// 		.setButtonText('Clear Cache')
+		// 		.onClick(async () =>
+		// 		{
+		// 			const path = new Path(exportPathInput.textInput.getValue());
+		// 			const website = await new Website(path).load();
+		// 			await website.index.clearCache();
+		// 			onChanged(path);
+		// 			confirmModal.close();
+		// 		}));
+		// 	}))
 
-			.addButton((button) => button
-			.setButtonText('Purge & Delete')
-			.onClick(async () =>
-			{
-				// create a modal to confirm the deletion
-				const confirmModal = new Modal(app);
-				confirmModal.titleEl.setText("Are you sure?");
-				confirmModal.contentEl.createEl('p', { text: "This will delete the entire site and all it's files." });
-				confirmModal.contentEl.createEl('p', { text: "This action cannot be undone." });
-				confirmModal.open();
+		// 	.addButton((button) => button
+		// 	.setButtonText('Purge & Delete')
+		// 	.onClick(async () =>
+		// 	{
+		// 		// create a modal to confirm the deletion
+		// 		const confirmModal = new Modal(app);
+		// 		confirmModal.titleEl.setText("Are you sure?");
+		// 		confirmModal.contentEl.createEl('p', { text: "This will delete the entire site and all it's files." });
+		// 		confirmModal.contentEl.createEl('p', { text: "This action cannot be undone." });
+		// 		confirmModal.open();
 
-				new Setting(confirmModal.contentEl)
-				.addButton((button) => button
-				.setButtonText('Cancel')
-				.onClick(() => confirmModal.close()))
-				.addButton((button) => button
-				.setButtonText('Purge & Delete')
-				.onClick(async () =>
-				{
-					const path = new Path(exportPathInput.textInput.getValue());
-					const website = await new Website(path).load();
-					await website.index.purge();
-					onChanged(path);
-					confirmModal.close();
-				}));
-			})).setDesc('Clear the site cache to re-export all files, or purge / delete the site with all it\'s files.');
+		// 		new Setting(confirmModal.contentEl)
+		// 		.addButton((button) => button
+		// 		.setButtonText('Cancel')
+		// 		.onClick(() => confirmModal.close()))
+		// 		.addButton((button) => button
+		// 		.setButtonText('Purge & Delete')
+		// 		.onClick(async () =>
+		// 		{
+		// 			const path = new Path(exportPathInput.textInput.getValue());
+		// 			const website = await new Website(path).load();
+		// 			await website.index.purge();
+		// 			onChanged(path);
+		// 			confirmModal.close();
+		// 		}));
+		// 	})).setDesc('Clear the site cache to re-export all files, or purge / delete the site with all it\'s files.');
 
 		
 
@@ -304,27 +304,27 @@ export class ExportModal extends Modal
 				return
 			}
 
-			const website = new Website(path);
-			const index = new Index();
-			await index.load(website, website.exportOptions)
+			// const website = new Website(path);
+			// const index = new Index();
+			// await index.load(website, website.options);
 
-			if (!index.oldWebsiteData)
-			{
-				exportDescription.setText("This path currently contains no exported website.");
-				return;
-			}
+			// if (!index.oldWebsiteData)
+			// {
+			// 	exportDescription.setText("This path currently contains no exported website.");
+			// 	return;
+			// }
 
-			if (index.oldWebsiteData.pluginVersion != HTMLExportPlugin.pluginVersion)
-			{
-				exportDescription.setText("This path contains an export created with a different version of the plugin.");
-				return;
-			}
+			// if (index.oldWebsiteData.pluginVersion != HTMLExportPlugin.pluginVersion)
+			// {
+			// 	exportDescription.setText("This path contains an export created with a different version of the plugin.");
+			// 	return;
+			// }
 
-			const lastExportDate = new Date(index.oldWebsiteData.modifiedTime).toLocaleString();
-			const lastExportFiles = index.oldWebsiteData.allFiles?.length;
-			const lastExportName = index.oldWebsiteData.siteName;
+			// const lastExportDate = new Date(index.oldWebsiteData.modifiedTime).toLocaleString();
+			// const lastExportFiles = index.oldWebsiteData.allFiles?.length;
+			// const lastExportName = index.oldWebsiteData.siteName;
 
-			exportDescription.setText(`Path contains site: "${lastExportName}" with ${lastExportFiles} files last exported on ${lastExportDate}.`);
+			// exportDescription.setText(`Path contains site: "${lastExportName}" with ${lastExportFiles} files last exported on ${lastExportDate}.`);
 		}
 
 		exportPathInput.textInput.onChange(() => onChanged(new Path(exportPathInput.textInput.getValue())));

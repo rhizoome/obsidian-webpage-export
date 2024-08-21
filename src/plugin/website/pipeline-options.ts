@@ -8,10 +8,11 @@ import { ThemeToggleOptions } from "shared/features/theme-toggle";
 import { GraphViewOptions } from "shared/features/graph-view";
 import { SidebarOptions } from "shared/features/sidebar";
 import { DocumentOptions } from "shared/features/document";
-import { EmojiStyle } from "shared/website-data";
+import { EmojiStyle, WebsiteFeatureOptions } from "shared/website-data";
 import { SearchOptions } from "shared/features/search";
 import { CustomHeadOptions } from "shared/features/custom-head";
 import { MarkdownRendererOptions } from "plugin/render-api/api-options";
+import { FeatureOptions } from "shared/features/feature-options-base";
 
 export class ExportPipelineOptions extends MarkdownRendererOptions
 {
@@ -221,6 +222,24 @@ export class ExportPipelineOptions extends MarkdownRendererOptions
 	 * Include CSS from all svelte components in the export.
 	 */
 	includeSvelteCSS: boolean = true;
+
+	public getFeatureOptions(): WebsiteFeatureOptions
+	{
+		return {
+			backlinks: this.backlinkOptions,
+			tags: this.tagOptions,
+			alias: this.aliasOptions,
+			properties: this.propertiesOptions,
+			fileNavigation: this.fileNavigationOptions,
+			search: this.searchOptions,
+			outline: this.outlineOptions,
+			themeToggle: this.themeToggleOptions,
+			graphView: this.graphViewOptions,
+			sidebar: this.sidebarOptions,
+			customHead: this.customHeadOptions,
+			document: this.fileOptions,
+		};
+	}
 }
 
 

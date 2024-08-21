@@ -1,4 +1,4 @@
-import { WebpageData, DocumentType } from "shared/website-data";
+import { WebpageData, ObsidianFileType } from "shared/website-data";
 import { BacklinkList } from "./backlinks";
 import { Callout } from "./callouts";
 import { Canvas } from "./canvas";
@@ -22,7 +22,7 @@ export class WebpageDocument
 	public parent: WebpageDocument | null;
 	public canvas: Canvas;
 
-	public documentType: DocumentType;
+	public documentType: ObsidianFileType;
 	public containerEl: HTMLElement;
 	public documentEl: HTMLElement;
 	public sizerEl: HTMLElement;
@@ -34,6 +34,7 @@ export class WebpageDocument
 	public pathname: string;
 	public hash: string;
 	public query: string;
+	public contentURL: string;
 	public queryParameters: URLSearchParams; 
 
 	public initialized: boolean = false;
@@ -65,32 +66,19 @@ export class WebpageDocument
 			return;
 		}
 
+		// add "-content" to the end of the filename if it is an html file
 		if (url == "" || url == "/" || url == "\\") url = "/index.html";
-		if (url.startsWith("#") || url.startsWith("?")) url = ObsidianSite.document.pathname + url;
+		if (url.startsWith("#") || url.startsWith("?")) url = ObsidianSite.document?.pathname + url;
 
 		this.pathname = LinkHandler.getPathnameFromURL(url);
+
+		this.contentURL = this.pathname;
+		if (url.endsWith(".html")) this.contentURL = this.pathname.substring(0, url.length - 5) + "-content.html";
+
 		const parsedURL = new URL(window?.location?.origin + "/" + url);
 		this.hash = parsedURL.hash;
 		this.query = parsedURL.search;
 		this.queryParameters = parsedURL.searchParams;
-
-		// load webpage data
-		this.info = ObsidianSite.getWebpageData(this.pathname) as WebpageData;
-		if (!this.info)
-		{
-			new Notice("This page does not exist yet.");
-			console.warn("This page does not exist yet.", this.pathname);
-			return;
-		}
-
-		this._exists = true;
-
-		// set type
-		this.documentType = this.info.type as DocumentType;
-		console.log("Document type", this.documentType, this.info.type);
-
-		// set title
-		this.title = this.info.title;
 	}
 
 	public findHeader(predicate: (header: Header) => boolean): Header | null
@@ -126,6 +114,8 @@ export class WebpageDocument
 		
 		this.findElements();
 
+		if (!this.documentEl) return this;
+
 		if (this.isRootDocument)
 		{
 			LinkHandler.initializeLinks(this.sizerEl ?? this.documentEl ?? this.containerEl);
@@ -156,8 +146,31 @@ export class WebpageDocument
 
 	public async load(parent: WebpageDocument | null = null, containerEl: HTMLElement = ObsidianSite.centerContentEl): Promise<WebpageDocument>
 	{
-		if (!this.pathname || !this.exists) return this;
-		if (!parent && ObsidianSite.document.pathname == this.pathname)
+		// load webpage data
+		this.info = await ObsidianSite.getWebpageData(this.pathname) as WebpageData;
+		if (!this.info)
+		{
+			new Notice("This page does not exist yet.");
+			console.warn("This page does not exist yet.", this.pathname);
+			return this;
+		}
+
+		this._exists = true;
+
+		// set type
+		this.documentType = this.info.type as ObsidianFileType;
+		console.log("Document type", this.documentType, this.info.type);
+
+		// set title
+		this.title = this.info.title;
+
+		if (!this.pathname || !this.exists)
+		{
+			console.error("Page may not exist", this.pathname);
+			return this;
+		}
+
+		if (!parent && ObsidianSite.document?.pathname == this.pathname)
 		{
 			console.log("Already on this page");
 			new Notice("This page is already open.", 2000);
@@ -176,7 +189,7 @@ export class WebpageDocument
 			await this.setAsActive();
 		}
 
-		const documentReq = await ObsidianSite.fetch(this.pathname);
+		const documentReq = await ObsidianSite.fetch(this.contentURL);
 		if (documentReq?.ok)
 		{
 			const documentText = await documentReq.text();
@@ -192,6 +205,11 @@ export class WebpageDocument
 				if (docEl) docEl.replaceWith(newDocumentEl);
 				else containerEl.appendChild(newDocumentEl);
 			}
+			else
+			{
+				console.error("New document element not found", this.pathname);
+				return this;
+			}
 
 			if (!parent && newOutlineEl) // only replace the outline if we are the root document
 			{
@@ -201,6 +219,13 @@ export class WebpageDocument
 			}
 
 			await this.postLoadInit()
+
+			if (!this.documentEl)
+			{
+				console.log("Document element not found", this.pathname);
+				return this;
+			}
+
 			await this.loadChildDocuments();
 
 			this.initialized = false;
@@ -226,7 +251,7 @@ export class WebpageDocument
 		if (this.isRootDocument && ObsidianSite.metadata.featureOptions.tags.enabled) 
 			this.createTags();
 
-		if (this.documentType == DocumentType.Canvas)
+		if (this.documentType == ObsidianFileType.Canvas)
 		{
 			this.canvas = new Canvas(this);
 		}
@@ -293,6 +318,8 @@ export class WebpageDocument
 
 	public async loadChildDocuments()
 	{
+		if (!this.documentEl) return;
+
 		// prevent infinite recursion
 		let parentTemp: WebpageDocument | null = this;
 		let parentCount = 0;
