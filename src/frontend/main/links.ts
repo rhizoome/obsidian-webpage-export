@@ -30,7 +30,7 @@ export class LinkHandler
 			}
 			else if (link.classList.contains("internal-link"))
 			{
-				FilePreviewPopover.initializeLink(link, target);
+				//FilePreviewPopover.initializeLink(link, target);
 			}
 		});
 	}
